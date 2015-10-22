@@ -7,6 +7,7 @@
 
 #include "UsefulMath.h"
 #include "DeadSwipe.h"
+#include <math.h>
 
 // the sigmoid control loops used to make sure a motor reaches its
 // target without over/undershooting
@@ -61,9 +62,10 @@ float scaleyFunction(float JoyRaw, int c, int steepyness ){
 	if(steepyness % 2 == 0){
 		return -2;
 	} else {
-		float *scaledJoy = (JoyRaw^(1/steepyness));
+		// float *scaledJoy = (JoyRaw^(1/steepyness));
+		float scaledJoy = pow(JoyRaw, 1/steepyness);
 
-		return *scaledJoy;
+		return scaledJoy;
 	}
 }
 

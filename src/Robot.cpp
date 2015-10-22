@@ -1,5 +1,6 @@
 #include "WPILib.h"
 #include "DeadSwipe.h"
+#include "UsefulMath.h"
 #include "F310.h"
 
 class Robot : public SampleRobot
@@ -158,10 +159,15 @@ public:
 			{
 				manualOverride = ~manualOverride;
 			}
-			dbDrive->TankDrive(oiLeft->GetY(), oiRight->GetY());
+
+			float lyDrive = scaleyFunction(oiLeft->GetY(), 0, 3);
+			float ryDrive = scaleyFunction(oiRight->GetY(), 0, 3);
+			float xDrive = scaleyFunction(oiRight->GetX(), 0, 3);
+
+			dbDrive->TankDrive(lyDrive, ryDrive);
 			if (oiRight->GetRawButton(1) == true)
 			{
-				this->HDrive(oiRight->GetX());
+				this->HDrive(xDrive);
 			}
 
 			if (manualOverride == true)
@@ -169,6 +175,7 @@ public:
 				eLeft->Set(oiGamepad->GetRawAxis(1));
 				eRight->Set(oiGamepad->GetRawAxis(3));
 			}
+			SmartDashboard::PutBoolean("ManualOverride:", manualOverride);
 
 		} // end or while loop
 
@@ -264,6 +271,14 @@ public:
 	{
 		SmartDashboard::PutNumber("eLeft", eLeftEnc->GetDistance());
 		SmartDashboard::PutNumber("eRight", eRightEnc->GetDistance());
+		SmartDashboard::PutNumber("eLeft Pulses", eLeftEnc->Get());
+		SmartDashboard::PutNumber("eLeft revs", eLeftEnc->Get() / OPTICAL_PPR);
+		float LRevs = eLeftEnc->Get() / OPTICAL_PPR;
+		SmartDashboard::PutNumber("eLeft Pulses per rev", EncoderMagic(LRevs));
+		SmartDashboard::PutNumber("eRight pulses", eRightEnc->Get());
+		SmartDashboard::PutNumber("eRight revs", eRightEnc->Get() / OPTICAL_PPR);
+		float RRevs = eRightEnc->Get() / OPTICAL_PPR;
+		SmartDashboard::PutNumber("eRight pulses per rev", EncoderMagic(RRevs));
 	}
 
 	void Debug()
