@@ -21,9 +21,10 @@
 // 1.3 in w/o windage
 // 1.5 in at start
 // 2 in at end
+// 22.5 at highest
 float sigmoid(float e,float m,float f,float s);
 float EncoderMagic(float x);
-float scaleyFunction(float JoyRaw, int c, int steepyness );
+float scaleyFunction(float JoyRaw, int steepyness );
 
 
 

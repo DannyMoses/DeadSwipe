@@ -52,7 +52,7 @@ float EncoderMagic(float x)
 	return C / ELEVATOR_GEAR_RATIO * OPTICAL_PPR;
 }
 
-float scaleyFunction(float JoyRaw, int c, int steepyness ){
+float scaleyFunction(float JoyRaw, int steepyness ){
 //	JoyRaw     = Raw Joystick value
 //	c	   = Some constant or whatever who cares
 //      steepyness = How quickly the scaled value increases. smaller steepyness = faster increase

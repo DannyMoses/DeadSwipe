@@ -36,8 +36,13 @@ class Robot : public SampleRobot
 	DoubleSolenoid *epLeft; // PCM ports 0 and 1
 	DoubleSolenoid *epRight; // PCM ports 2 and 3
 
-	Encoder *eLeftEnc; // DIO 6 and 7
-	Encoder *eRightEnc; // DIO 8 and 9
+	DigitalInput *eLeftBottom; // DIO 6
+	DigitalInput *eLeftTop; // DIO 7
+	DigitalInput *eRightBottom; // DIO 8
+	DigitalInput *eRightTop; // DIO 9
+
+//	Encoder *eLeftEnc; // DIO 6 and 7
+//	Encoder *eRightEnc; // DIO 8 and 9
 
 	// intake declarations
 
@@ -61,7 +66,7 @@ public:
 {
 		oiLeft = new Joystick(0);
 		oiRight = new Joystick(1);
-		oiGamepad = new F310(3);
+		oiGamepad = new F310(2);
 		autoChooser = new SendableChooser();
 		autoChooser->AddDefault("Do Nuffin", (int *) mode1);
 		autoChooser->AddObject("Move you goddamm robot", (int *) mode2);
@@ -95,20 +100,25 @@ public:
 		epLeft = new DoubleSolenoid(0, 0, 1);
 		epRight = new DoubleSolenoid(0, 2, 3);
 
-		eLeft = new Talon(0);
-		eRight = new Talon(1);
+		eLeft = new Talon(2);
+		eRight = new Talon(3);
 
-		eLeftEnc = new Encoder(6, 7, false, Encoder::k4X);
-		eLeftEnc->SetDistancePerPulse(ELEVATOR_DISTANCE_PER_PULSE);
+//		eLeftEnc = new Encoder(6, 7, false, Encoder::k4X);
+//		eLeftEnc->SetDistancePerPulse(OPTICAL_PPR);
+//
+//		eRightEnc = new Encoder(8, 9, true, Encoder::k4X);
+//		eRightEnc->SetDistancePerPulse(OPTICAL_PPR);
 
-		eRightEnc = new Encoder(8, 9, false, Encoder::k4X);
-		eRightEnc->SetDistancePerPulse(ELEVATOR_DISTANCE_PER_PULSE);
+		eLeftBottom = new DigitalInput(6);
+		eLeftTop = new DigitalInput(7);
+		eRightBottom = new DigitalInput(8);
+		eRightTop = new DigitalInput(9);
 
 		ipLeft = new DoubleSolenoid(0, 4, 5);
 		ipRight = new DoubleSolenoid(0, 6, 7);
 
-		iLeft = new Talon(2);
-		iRight= new Talon(3);
+		iLeft = new Talon(0);
+		iRight= new Talon(1);
 
 } // end of constructor
 
@@ -160,21 +170,60 @@ public:
 				manualOverride = ~manualOverride;
 			}
 
-			float lyDrive = scaleyFunction(oiLeft->GetY(), 0, 3);
-			float ryDrive = scaleyFunction(oiRight->GetY(), 0, 3);
-			float xDrive = scaleyFunction(oiRight->GetX(), 0, 3);
-
-			dbDrive->TankDrive(lyDrive, ryDrive);
-			if (oiRight->GetRawButton(1) == true)
-			{
-				this->HDrive(xDrive);
+			if(oiGamepad->GetRawButton(F310::kAButton)) {
+				eLeft->Set(0.0);
+				eRight->Set(0.0);
 			}
 
-			if (manualOverride == true)
-			{
-				eLeft->Set(oiGamepad->GetRawAxis(1));
-				eRight->Set(oiGamepad->GetRawAxis(3));
+			if(oiGamepad->GetRawButton(F310::kRightBumper)) {
+				eLeft->Set(1.0);
+				eRight->Set(1.0);
 			}
+
+			if(oiGamepad->GetRawButton(F310::kRightTrigger)) {
+				eLeft->Set(-1.0);
+				eRight->Set(-1.0);
+			}
+
+			if(oiGamepad->GetRawButton(F310::kLeftBumper)) {
+				iLeft->Set(1.0);
+				iRight->Set(-1.0);
+			}
+
+			if(oiGamepad->GetRawButton(F310::kLeftTrigger)) {
+				iLeft->Set(-1.0);
+				iRight->Set(1.0);
+			}
+
+			iLeft->Set(0);
+			iRight->Set(0);
+			eLeft->Set(0);
+			eRight->Set(0);
+			HDrive(0.0);
+
+
+
+//			float lyDrive = scaleyFunction(oiLeft->GetY(), 0, 3);
+//			float ryDrive = scaleyFunction(oiRight->GetY(), 0, 3);
+//			float xDrive = scaleyFunction(oiRight->GetX(), 0, 3);
+
+//			dbDrive->TankDrive(lyDrive, ryDrive);
+//			if (oiRight->GetRawButton(1) == true)
+//			{
+//				this->HDrive(xDrive);
+//			}
+
+			dbDrive->TankDrive(-oiLeft->GetY(), -oiRight->GetY());
+				if (oiRight->GetRawButton(1) == true)
+				{
+					this->HDrive(oiRight->GetX());
+			}
+			if (manualOverride) {
+				eLeft->Set(-oiGamepad->GetRawAxis(1));
+				eRight->Set(-oiGamepad->GetRawAxis(3));
+			}
+
+
 			SmartDashboard::PutBoolean("ManualOverride:", manualOverride);
 
 		} // end or while loop
@@ -269,16 +318,16 @@ public:
 	// elevator debug function
 	void eDebug()
 	{
-		SmartDashboard::PutNumber("eLeft", eLeftEnc->GetDistance());
-		SmartDashboard::PutNumber("eRight", eRightEnc->GetDistance());
-		SmartDashboard::PutNumber("eLeft Pulses", eLeftEnc->Get());
-		SmartDashboard::PutNumber("eLeft revs", eLeftEnc->Get() / OPTICAL_PPR);
-		float LRevs = eLeftEnc->Get() / OPTICAL_PPR;
-		SmartDashboard::PutNumber("eLeft Pulses per rev", EncoderMagic(LRevs));
-		SmartDashboard::PutNumber("eRight pulses", eRightEnc->Get());
-		SmartDashboard::PutNumber("eRight revs", eRightEnc->Get() / OPTICAL_PPR);
-		float RRevs = eRightEnc->Get() / OPTICAL_PPR;
-		SmartDashboard::PutNumber("eRight pulses per rev", EncoderMagic(RRevs));
+//		SmartDashboard::PutNumber("eLeft", eLeftEnc->GetDistance());
+//		SmartDashboard::PutNumber("eRight", eRightEnc->GetDistance());
+//		SmartDashboard::PutNumber("eLeft Pulses", eLeftEnc->Get());
+//		SmartDashboard::PutNumber("eLeft revs", eLeftEnc->Get() / OPTICAL_PPR);
+//		float LRevs = eLeftEnc->Get() / OPTICAL_PPR;
+//		SmartDashboard::PutNumber("eLeft Pulses per rev", EncoderMagic(LRevs));
+//		SmartDashboard::PutNumber("eRight pulses", eRightEnc->Get());
+//		SmartDashboard::PutNumber("eRight revs", eRightEnc->Get() / OPTICAL_PPR);
+//		float RRevs = eRightEnc->Get() / OPTICAL_PPR;
+//		SmartDashboard::PutNumber("eRight pulses per rev", EncoderMagic(RRevs));
 	}
 
 	void Debug()
