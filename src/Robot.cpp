@@ -33,8 +33,8 @@ class Robot : public SampleRobot
 	Talon *eLeft; // pwm 0
 	Talon *eRight; // pwm 1
 
-	DoubleSolenoid *epLeft; // PCM ports 0 and 1
-	DoubleSolenoid *epRight; // PCM ports 2 and 3
+	DoubleSolenoid *epLeft; // PCM ports 3 and 4
+	DoubleSolenoid *epRight; // PCM ports 2 and 5
 
 	DigitalInput *eLeftBottom; // DIO 6
 	DigitalInput *eLeftTop; // DIO 7
@@ -49,8 +49,8 @@ class Robot : public SampleRobot
 	Talon *iLeft; // pwm 2
 	Talon *iRight; // pwm 3
 
-	DoubleSolenoid *ipLeft; // PCM ports 4 and 5
-	DoubleSolenoid *ipRight; // PCM ports 6 and 7
+	DoubleSolenoid *ipLeft; // PCM ports 1 and 6
+	DoubleSolenoid *ipRight; // PCM ports 0 and 7
 
 	// operator interface declarations - prefixed by oi
 	Joystick *oiLeft;
@@ -97,8 +97,8 @@ public:
 		dbGyro = new Gyro(0);
 		dbGyro->SetSensitivity(0.007);
 
-		epLeft = new DoubleSolenoid(0, 0, 1);
-		epRight = new DoubleSolenoid(0, 2, 3);
+		epLeft = new DoubleSolenoid(0, 3, 4);
+		epRight = new DoubleSolenoid(0, 2, 5);
 
 		eLeft = new Talon(2);
 		eRight = new Talon(3);
@@ -114,8 +114,8 @@ public:
 		eRightBottom = new DigitalInput(8);
 		eRightTop = new DigitalInput(9);
 
-		ipLeft = new DoubleSolenoid(0, 4, 5);
-		ipRight = new DoubleSolenoid(0, 6, 7);
+		ipLeft = new DoubleSolenoid(0, 1, 6);
+		ipRight = new DoubleSolenoid(0, 0, 7);
 
 		iLeft = new Talon(0);
 		iRight= new Talon(1);
@@ -184,6 +184,31 @@ public:
 				eLeft->Set(-1.0);
 				eRight->Set(-1.0);
 			}
+//			if(oiGamepad->GetButton(F310::kRightTrigger) == true)
+//				{
+//					 if((eLeftTop->Get() == 0) && (eRightTop->Get() == 0))
+//					 {
+//						 eLeft->Set(1.0);
+//						 eRight->Set(1.0);							 }							else
+//						 {
+//							 eLeft->Set(0.0);
+//							 eRight->Set(0.0);
+//						 }
+//					}
+//
+//						if(oiGamepad->GetButton(F310::kLeftTrigger) == true)
+//						{
+//							if((eLeftBottom->Get() == 0) && (eRightBottom->Get() == 0))
+//							{
+//								eLeft->Set(-1.0);
+//								eRight->Set(-1.0);
+//							}
+//							else
+//							{
+//								eLeft->Set(0.0);
+//								eRight->Set(0.0);
+//							}
+//						}
 
 			if(oiGamepad->GetRawButton(F310::kLeftBumper)) {
 				iLeft->Set(1.0);
